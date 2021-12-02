@@ -4,44 +4,29 @@
                     ---------------------------
                          radical_intention     
 -----------------------------------------------
-covid_burden                  0.074**          
+covid_burden                  0.083**          
                               (0.034)          
                                                
-gender                        0.124**          
+gender                        0.104*           
                               (0.053)          
                                                
-raceBlack                      0.086           
-                              (0.177)          
+education                      0.011           
+                              (0.032)          
                                                
-raceHispanic                  -0.187           
-                              (0.175)          
+age                          -0.076***         
+                              (0.008)          
                                                
-raceMixed                    -0.814**          
-                              (0.326)          
-                                               
-raceNative American            0.143           
-                              (0.325)          
-                                               
-raceOther                     -0.320           
-                              (0.280)          
-                                               
-raceWhite                    -0.311**          
-                              (0.158)          
-                                               
-age                          -0.074***         
-                              (0.009)          
-                                               
-US_ideo                      -0.135***         
+US_ideo                      -0.148***         
                               (0.022)          
                                                
-Constant                     2.218***          
-                              (0.211)          
+Constant                     1.974***          
+                              (0.170)          
                                                
 -----------------------------------------------
 Observations                    971            
-R2                             0.175           
-Adjusted R2                    0.166           
-Residual Std. Error      0.811 (df = 960)      
-F Statistic          20.350*** (df = 10; 960)  
+R2                             0.151           
+Adjusted R2                    0.147           
+Residual Std. Error      0.821 (df = 965)      
+F Statistic           34.404*** (df = 5; 965)  
 ===============================================
 Note:               *p<0.1; **p<0.05; ***p<0.01

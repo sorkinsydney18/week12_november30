@@ -116,6 +116,15 @@ Now let's take some time to review several of the different visualization strate
 
 Density plots are a good way to show the distribution of a variable of interest in a population. **Make a density plot with perceived COVID-19 burden as the variable of interest. Use different colors to simultaneously show the density of this variable in each country in the sample. Comment on any notable differences between countries.**
 
+```{r}
+covid_data %>% 
+  ggplot(aes(x = covid_burden, color =country)) +
+  geom_density() +
+  geom_vline(xintercept = 3.7, linetype = "dotted") +
+  labs(title = "Distribution of COVID Burden",
+       subtitle = "The median COVID burden of the sample is 3.7")
+```
+
 
 ## Question 3
 We already analyzed the list experiment. Let's look at a different way to evaluate the link between the psychological burden of COVID and radicalization: linear regression.
@@ -139,18 +148,25 @@ This plot shows a clear positive relationship between COVID burden and radicalis
 ```{r}
 covid_data %>%
   ggplot(mapping = aes(x = covid_burden, y = radical_intention, color = country)) + 
-  geom_smooth(method = 'lm', se = FALSE)
+  geom_smooth(method = 'lm', se = FALSE) +
+  labs(title = "Relationship Between Percieved Covid Burden and Radicalist Intentions",
+       x = "COVID Burden: ( 1 lowest)",
+       y = "Radical Intentions: (1 lowest)")
+
 ```
-```
+
 
 
 # Part b
 **Fit a multivariate linear regression of radicalism intention on COVID burden with education, age, and gender as control variables. Use the complete sample; don't subset by country. Present the results in a regression table and comment on your findings. Make sure to comment on the main explanatory variable (COVID burden) but also comment on the control variables in the context of theories we have learned about in class.** Hint: The \texttt{stargazer} package makes good regression tables; set \texttt{type = 'text'}.
+
 ```{r}
-covid_multi_reg <- lm(radical_intention ~ covid_burden + gender + race + age, data = covid_data)
+covid_multi_reg <- lm(radical_intention ~ covid_burden + gender + education + age, data = covid_data)
 
 stargazer(covid_multi_reg, type  = 'text', out = 'table1.txt', flip = TRUE)
+
 ```
+
 
 
 # Part c
@@ -161,9 +177,13 @@ US_covid <- covid_data %>%
 filter(country == "United States")
 
 
-us_reg <- lm(radical_intention ~ covid_burden + gender + race + age + US_ideo, data = US_covid)
+us_reg <- lm(radical_intention ~ covid_burden + gender + education + age + US_ideo, data = US_covid)
 
 stargazer(us_reg, type  = 'text', out = 'table2.txt', flip = TRUE)
+
+US_covid %>% 
+ggplot(aes(x = US_ideo, y = radical_intention)) +
+geom_smooth(method  =  "lm")
 ```
 
 
@@ -173,11 +193,87 @@ stargazer(us_reg, type  = 'text', out = 'table2.txt', flip = TRUE)
 There are seven different outcome variables associated with respondents' activities related to the summer 2020 BLM protests. (Note that these variables were only collected for US respondents.) **Fit seven different multivariate linear regressions, one for each outcome variable. Use COVID burden, education, age, and gender as independent variables. Make a single coefficient plot with the point estimate and 95\% confidence intervals for the coefficient on COVID burden for each outcome variable.** Hint: look back at the solutions to Data Exercise 8 for ideas about how to code this.
 
 ```{r}
-lm(support_BLM ~ covid_burden + gender + race + age, data = US_covid)
+
+#models
+support_blm <- lm(support_BLM ~ covid_burden + gender + education + age, data = US_covid)
+
+protest_rioting <- lm(protest_rioting ~ covid_burden + gender + education + age, data = US_covid)
+
+protect_property <- lm(protect_property ~ covid_burden + gender + education + age, data = US_covid)
+
+confront_police <- lm(confront_police ~ covid_burden + gender + education + age, data = US_covid)
+
+confront_blm <- lm(confront_BLM ~ covid_burden + gender + education + age, data = US_covid)
+
+destroy_property <- lm(destroy_property ~ covid_burden + gender + education + age, data = US_covid)
+
+confront_citizens <- lm(confront_citizens ~ covid_burden + gender + education + age, data = US_covid)
+
+#labels
+outcomes <- c("Support BLM Coef", "Protest Rioting Coef", "Protect Property Coef", 
+"Confront Police Coef", "Confront BLM Coef", "Destroy Property Coef", "Confront Citizens Coef")
+
+#coefficient vector
+
+points <- c(support_blm$coefficients[2],
+protest_rioting$coefficients[2],
+protect_property$coefficients[2],
+confront_police$coefficients[2],
+confront_blm$coefficients[2],
+destroy_property$coefficients[2],
+confront_citizens$coefficients[2])
+
+#confidence intervals
+
+support_blm_conf <- confint(support_blm, 'covid_burden', level = 0.95)
+protest_rioting_conf <- confint(protest_rioting, 'covid_burden', level = 0.95)
+protect_property_conf <- confint(protect_property, 'covid_burden', level = 0.95)
+confront_police_conf <- confint(confront_police, 'covid_burden', level = 0.95)
+confront_blm_conf <- confint(confront_blm, 'covid_burden', level = 0.95)
+destroy_property_conf <- confint(destroy_property, 'covid_burden', level = 0.95)
+confront_citizens_conf <- confint(confront_citizens, 'covid_burden', level = 0.95)
+
+lowbounds <- c(support_blm_conf[1:1],
+protest_rioting_conf[1:1],
+protect_property_conf[1:1],
+confront_police_conf[1:1],
+confront_blm_conf[1:1],
+destroy_property_conf[1:1],
+confront_citizens_conf[1:1])
+
+upbounds <- c(support_blm_conf[2:2],
+protest_rioting_conf[2:2],
+protect_property_conf[2:2],
+confront_police_conf[2:2],
+confront_blm_conf[2:2],
+destroy_property_conf[2:2],
+confront_citizens_conf[2:2])
+
+
+outcome_tibble <- tibble(outcomes, points, lowbounds, upbounds)
+
+ggplot(outcome_tibble,
+       aes(factor(x = outcomes, levels = outcomes),
+           y = points,
+           ymin = lowbounds,
+           ymax = upbounds)) +
+  geom_pointrange() +
+  geom_hline(yintercept = 0, linetype = 'dashed') + 
+  coord_flip() + 
+  labs(title = "Affect of Covid Burden on Outcome Variables",
+       x = "Outcome Variable",
+       y = "Coefficient of Covid Burden")
+  
+
+
+
 ```
+
 
 ## Question 5: DATA SCIENCE QUESTION
 **Pick one of the outcomes associated with the BLM protests. Define a new binary variable that takes 1 if the respondent actually engaged in the behavior and 0 if they didn't engage in it or merely hypothetically would engage in it. Fit a regression model of your choosing with your new variable as the outcome, COVID burden as the independent variable, and control variables of your choosing. Plot the predicted probability of engaging in your chosen behavior as a function of COVID burden, holding other variables at their mean (or, for gender, making separate plots for each gender). Make sure to also plot 95\% confidence intervals.** Hint: look back at the solutions to Data Exercise 6 for ideas about how to code this.
+
+
 
 
 ## Question 6
