@@ -163,6 +163,8 @@ covid_data %>%
 ```{r}
 covid_multi_reg <- lm(radical_intention ~ covid_burden + gender + education + age, data = covid_data)
 
+
+
 stargazer(covid_multi_reg, type  = 'text', out = 'table1.txt', flip = TRUE)
 
 ```
@@ -180,10 +182,6 @@ filter(country == "United States")
 us_reg <- lm(radical_intention ~ covid_burden + gender + education + age + US_ideo, data = US_covid)
 
 stargazer(us_reg, type  = 'text', out = 'table2.txt', flip = TRUE)
-
-US_covid %>% 
-ggplot(aes(x = US_ideo, y = radical_intention)) +
-geom_smooth(method  =  "lm")
 ```
 
 
@@ -210,8 +208,8 @@ destroy_property <- lm(destroy_property ~ covid_burden + gender + education + ag
 confront_citizens <- lm(confront_citizens ~ covid_burden + gender + education + age, data = US_covid)
 
 #labels
-outcomes <- c("Support BLM Coef", "Protest Rioting Coef", "Protect Property Coef", 
-"Confront Police Coef", "Confront BLM Coef", "Destroy Property Coef", "Confront Citizens Coef")
+outcomes <- c("Support BLM", "Protest Rioting", "Protect Property", 
+"Confront Police", "Confront BLM", "Destroy Property", "Confront Citizens")
 
 #coefficient vector
 
@@ -252,8 +250,9 @@ confront_citizens_conf[2:2])
 
 outcome_tibble <- tibble(outcomes, points, lowbounds, upbounds)
 
-ggplot(outcome_tibble,
-       aes(factor(x = outcomes, levels = outcomes),
+
+outcome_tibble %>% 
+ggplot(aes(factor(x = outcomes, levels = outcomes),
            y = points,
            ymin = lowbounds,
            ymax = upbounds)) +
@@ -262,10 +261,8 @@ ggplot(outcome_tibble,
   coord_flip() + 
   labs(title = "Affect of Covid Burden on Outcome Variables",
        x = "Outcome Variable",
-       y = "Coefficient of Covid Burden")
+       y = "Coefficient of Covid Burden") 
   
-
-
 
 ```
 
